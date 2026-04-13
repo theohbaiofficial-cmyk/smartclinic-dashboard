@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PolySkin — Clinic Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,sans-serif}
+body{background:#eef2f0;min-height:100vh}
+.sidebar{width:220px;background:#083232;min-height:100vh;display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+.main{margin-left:220px;min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid #e5e7eb;padding:15px 26px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:50;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.content{padding:22px 26px;flex:1}
+.logo-area{padding:22px 18px;border-bottom:1px solid rgba(255,255,255,0.07);display:flex;align-items:center;gap:11px}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,#14b8a6,#0d9488);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;font-weight:900;flex-shrink:0}
+.logo-name{color:#fff;font-weight:800;font-size:16px}
+.logo-sub{color:rgba(255,255,255,0.3);font-size:9px;text-transform:uppercase;letter-spacing:0.6px;font-weight:600;margin-top:1px}
+.nav-area{flex:1;padding:16px 11px;display:flex;flex-direction:column;gap:4px}
+.nav-lbl{font-size:9px;color:rgba(255,255,255,0.25);font-weight:700;letter-spacing:1px;padding:0 10px 8px;text-transform:uppercase}
+.nav-btn{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:11px;border:none;width:100%;background:transparent;color:rgba(255,255,255,0.45);cursor:pointer;font-size:13px;font-weight:400;text-align:left;border-left:3px solid transparent;transition:all 0.15s}
+.nav-btn:hover{color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.05)}
+.nav-btn.active{background:rgba(20,184,166,0.18);color:#5eead4;border-left:3px solid #14b8a6;font-weight:700}
+.nav-icon{font-size:16px}
+.user-area{padding:16px 15px 20px;border-top:1px solid rgba(255,255,255,0.07)}
+.avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#14b8a6,#0d9488);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800;flex-shrink:0}
+.logout-btn{width:100%;padding:9px;background:rgba(239,68,68,0.12);color:#fca5a5;border:1px solid rgba(239,68,68,0.2);border-radius:9px;cursor:pointer;font-size:12px;font-weight:700;margin-top:11px}
+.refresh-btn{width:100%;padding:8px;background:rgba(20,184,166,0.15);color:#5eead4;border:1px solid rgba(20,184,166,0.25);border-radius:9px;cursor:pointer;font-size:11px;font-weight:700;margin-top:7px}
+.sync-info{font-size:10px;color:rgba(255,255,255,0.25);text-align:center;margin-top:8px}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:18px}
+.stat-card{background:#fff;border-radius:13px;padding:18px;border:1px solid #e5e7eb;border-top-width:4px}
+.stat-num{font-size:30px;font-weight:900;line-height:1;margin-top:6px}
+.stat-lbl{font-size:11px;color:#6b7280;margin-top:5px;font-weight:500}
+.card{background:#fff;border-radius:13px;padding:20px;border:1px solid #e5e7eb}
+.card-title{font-weight:800;font-size:14px;color:#111827;margin-bottom:14px}
+.two-col{display:grid;grid-template-columns:1fr 270px;gap:14px}
+.apt-row{display:flex;align-items:center;gap:12px;padding:11px 13px;border-radius:10px;background:#f9fafb;cursor:pointer;margin-bottom:8px;border:1px solid transparent;transition:all 0.12s}
+.apt-row:hover{background:#f0fdf9;border-color:#a7f3d0}
+.time-badge{font-size:12px;font-weight:800;color:#0f766e;min-width:42px;background:#f0fdf9;padding:3px 7px;border-radius:7px;text-align:center}
+.apt-name{font-weight:700;font-size:13px;color:#111827}
+.apt-sub{font-size:11px;color:#9ca3af;margin-top:1px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.b-confirmed{background:#ecfdf5;color:#065f46}
+.b-pending{background:#fffbeb;color:#92400e}
+.b-cancelled{background:#fef2f2;color:#991b1b}
+.b-completed{background:#eff6ff;color:#1e40af}
+.dot{width:5px;height:5px;border-radius:50%;display:inline-block;flex-shrink:0}
+.d-confirmed{background:#10b981}.d-pending{background:#f59e0b}.d-cancelled{background:#ef4444}.d-completed{background:#3b82f6}
+.role-pill{padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700}
+.r-admin{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0}
+.r-recep{background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{padding:10px 15px;text-align:left;font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.6px;background:#f9fafb;white-space:nowrap}
+td{padding:12px 15px;border-top:1px solid #f3f4f6;color:#111827;vertical-align:middle}
+tr:hover td{background:#f9fafb;cursor:pointer}
+.initials{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#0f766e,#14b8a6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:800;flex-shrink:0}
+input,select{padding:9px 12px;border:1.5px solid #e5e7eb;border-radius:9px;font-size:12px;background:#fff;color:#111827;font-family:inherit;outline:none}
+input:focus,select:focus{border-color:#14b8a6}
+.filter-bar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.filter-bar input[type="text"]{flex:1;min-width:180px}
+.clear-btn{padding:8px 13px;background:#fef2f2;color:#dc2626;border:1.5px solid #fecaca;border-radius:9px;cursor:pointer;font-size:11px;font-weight:700;font-family:inherit}
+.branch-fill{height:5px;background:linear-gradient(90deg,#0f766e,#14b8a6);border-radius:99px}
+.branch-bar{height:5px;background:#f3f4f6;border-radius:99px;margin-top:5px;overflow:hidden}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-hdr{text-align:center;font-size:9px;font-weight:700;color:#9ca3af;padding:4px 0}
+.cal-day{border-radius:9px;padding:7px 2px 10px;text-align:center;cursor:pointer;font-size:13px;color:#374151;position:relative;border:2px solid transparent;transition:all 0.12s}
+.cal-day:hover:not(.sel){background:#f3f4f6}
+.cal-day.sel{background:#0f766e;color:#fff;font-weight:800}
+.cal-day.today:not(.sel){border-color:#10b981;color:#0f766e;font-weight:700}
+.cal-dots{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);display:flex;gap:2px}
+.cal-dot{width:4px;height:4px;border-radius:50%;background:#10b981}
+.cal-dot.on-sel{background:rgba(255,255,255,0.75)}
+.cal-nav{background:#f3f4f6;border:none;border-radius:9px;width:36px;height:36px;cursor:pointer;font-size:20px;color:#374151;display:flex;align-items:center;justify-content:center}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:999;padding:16px}
+.modal{background:#fff;border-radius:18px;padding:30px;width:480px;max-width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,0.25)}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.info-box{background:#f9fafb;border-radius:10px;padding:11px 13px}
+.info-lbl{font-size:9px;color:#9ca3af;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:3px}
+.info-val{font-size:13px;color:#111827;font-weight:700}
+.action-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;border:none;width:100%;margin-bottom:9px;font-family:inherit}
+.btn-cal{background:linear-gradient(135deg,#4f46e5,#6d28d9);color:#fff}
+.btn-wa{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff}
+.status-btns{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px}
+.s-btn{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:2px solid #e5e7eb;background:#fff;color:#9ca3af;font-family:inherit}
+.s-btn:disabled{cursor:default;opacity:0.45}
+.s-btn.ac{border-color:#10b981;background:#ecfdf5;color:#065f46}
+.s-btn.ap{border-color:#f59e0b;background:#fffbeb;color:#92400e}
+.s-btn.ax{border-color:#ef4444;background:#fef2f2;color:#991b1b}
+.s-btn.ad{border-color:#3b82f6;background:#eff6ff;color:#1e40af}
+.close-btn{background:#f3f4f6;border:none;border-radius:9px;width:34px;height:34px;cursor:pointer;font-size:20px;color:#6b7280;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.login-wrap{min-height:100vh;background:linear-gradient(135deg,#083232 0%,#0f766e 55%,#134e4a 100%);display:flex;align-items:center;justify-content:center}
+.login-card{background:#fff;border-radius:22px;padding:42px;width:400px;box-shadow:0 25px 60px rgba(0,0,0,0.3)}
+.login-inp{width:100%;padding:11px 13px;border:1.5px solid #e5e7eb;border-radius:10px;font-size:14px;color:#111827;font-family:inherit;outline:none;margin-bottom:4px}
+.login-lbl{font-size:11px;font-weight:700;color:#6b7280;display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px}
+.login-btn{width:100%;padding:13px;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.err-box{background:#fef2f2;color:#991b1b;padding:11px 14px;border-radius:9px;font-size:12px;margin-bottom:14px;display:none}
+.hint-box{background:#f9fafb;border-radius:10px;padding:13px 15px;font-size:12px;color:#6b7280;margin-top:18px;line-height:2}
+.branch-tag{background:#f0fdf9;color:#065f46;padding:2px 8px;border-radius:5px;font-size:10px;font-weight:700}
+.tag-sm{background:#f0fdf9;color:#065f46;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700}
+.spinner{width:36px;height:36px;border:3px solid #e5e7eb;border-top-color:#14b8a6;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.setup-card{background:#fff;border-radius:13px;padding:28px;border:1px solid #e5e7eb;max-width:680px}
+.step{display:flex;gap:14px;margin-bottom:16px;align-items:flex-start}
+.step-num{width:28px;height:28px;border-radius:50%;background:#0f766e;color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-text{font-size:13px;color:#374151;line-height:1.7}
+code{background:#f3f4f6;padding:2px 7px;border-radius:5px;font-family:monospace;font-size:12px;color:#0f766e}
+@media(max-width:900px){.stat-grid{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}.sidebar{display:none}.main{margin-left:0}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+
+/* ══════════════════════════════════════════
+   STEP 1 — PASTE YOUR APPS SCRIPT URL BELOW
+   ══════════════════════════════════════════ */
+https://script.google.com/macros/s/AKfycbwbXQE37T-wBL8omGlCyN5PzJWSCnh_ae8Be7CVR57xj5ThgVs9TNp9_FGuS0WKEoPO/exec
+/* ══════════════════════════════════════════ */
+
+const CREDS = {
+  admin:     { pass:"poly2024",  role:"Admin" },
+  reception: { pass:"recep2024", role:"Receptionist" }
+};
+const TODAY    = new Date().toISOString().split("T")[0];
+const DOCS     = ["All","Dr. Fatema Al-Ansari","Dr. Sara Al-Rashidi","Dr. Reem Al-Mahmoud","Dr. Noora Al-Mutairi"];
+const BRANCHES = ["All","Hawally","Salmiya","Mahboula","Sabah Al Salem"];
+const ST = {
+  Confirmed:{dot:"#10b981"},Pending:{dot:"#f59e0b"},
+  Cancelled:{dot:"#ef4444"},Completed:{dot:"#3b82f6"}
+};
+
+let S = {
+  user:null, tab:"overview", apts:[], loading:false, error:null,
+  sel:null, calYear:new Date().getFullYear(), calMonth:new Date().getMonth(),
+  calDay:new Date().getDate(), search:"", docF:"All", branchF:"All", statusF:"All", dateF:""
+};
+let refreshTimer = null;
+
+function ini(n){ return (n||"?").split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase(); }
+function badge(s){
+  const c=(s||"confirmed").toLowerCase();
+  return `<span class="badge b-${c}"><span class="dot d-${c}"></span>${s||"?"}</span>`;
+}
+function gcal(a){
+  const d=(a.date||"").replace(/-/g,"");
+  const[h="09",m="00"]=(a.time||"09:00").split(":");
+  const eh=String(parseInt(h)+1).padStart(2,"0");
+  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent("PolySkin - "+a.doctor)}&dates=${d}T${h}${m}00/${d}T${eh}${m}00&location=${encodeURIComponent("PolySkin "+a.branch+", Kuwait")}`;
+}
+function fmtDate(v){
+  if(!v) return "";
+  if(typeof v==="string") return v.split("T")[0];
+  if(typeof v==="number"){ const d=new Date((v-25569)*86400000); return d.toISOString().split("T")[0]; }
+  try{ return new Date(v).toISOString().split("T")[0]; }catch(e){ return String(v); }
+}
+function fmtTime(v){
+  if(!v) return "";
+  if(typeof v==="number"){ const t=Math.round(v*1440); return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0"); }
+  return String(v).substring(0,5);
+}
+
+async function fetchData(){
+  if(APPS_SCRIPT_URL==="YOUR_APPS_SCRIPT_URL_HERE"){ S.loading=false; S.error="setup"; render(); return; }
+  S.loading=true; S.error=null; render();
+  try{
+    const r = await fetch(APPS_SCRIPT_URL);
+    const j = await r.json();
+    S.apts = (j.appointments||[]).map((a,i)=>({
+      id:    a.id||i+1,
+      name:  a.name  ||a["Patient Name"]||a["Name"]   ||"Unknown",
+      phone: a.phone ||a["Phone"]       ||a["Phone Number"]||"",
+      doctor:a.doctor||a["Doctor"]      ||"",
+      branch:a.branch||a["Branch"]      ||"",
+      date:  fmtDate(a.date ||a["Date"]),
+      time:  fmtTime(a.time ||a["Time"]),
+      status:a.status||a["Status"]      ||"Confirmed"
+    }));
+    S.loading=false; S.error=null;
+  }catch(e){
+    S.loading=false; S.error="fetch"; S.apts=[];
+  }
+  render();
+  if(refreshTimer) clearTimeout(refreshTimer);
+  refreshTimer = setTimeout(fetchData, 60000);
+}
+
+function render(){
+  document.getElementById("root").innerHTML = S.user ? dashHTML() : loginHTML();
+  bind();
+}
+
+function loginHTML(){
+  return `<div class="login-wrap"><div class="login-card">
+  <div style="text-align:center;margin-bottom:30px">
+    <div style="width:58px;height:58px;background:linear-gradient(135deg,#0f766e,#14b8a6);border-radius:16px;margin:0 auto 13px;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff">✦</div>
+    <div style="font-size:23px;font-weight:900;color:#111827">PolySkin</div>
+    <div style="font-size:11px;color:#9ca3af;margin-top:3px;text-transform:uppercase;letter-spacing:0.5px;font-weight:600">Clinic Management System</div>
+  </div>
+  <div class="err-box" id="err">Invalid username or password.</div>
+  <label class="login-lbl">Username</label>
+  <input class="login-inp" id="lu" placeholder="admin  or  reception"/>
+  <div style="margin-bottom:14px"></div>
+  <label class="login-lbl">Password</label>
+  <input class="login-inp" id="lp" type="password" placeholder="Enter your password"/>
+  <div style="margin-bottom:22px"></div>
+  <button class="login-btn" id="login-btn">Sign In →</button>
+  <div class="hint-box">🔐 <strong>Admin:</strong> admin / poly2024<br>👤 <strong>Reception:</strong> reception / recep2024</div>
+  </div></div>`;
+}
+
+function dashHTML(){
+  const isAdmin=S.user.role==="Admin";
+  const nav=[{id:"overview",label:"Overview",icon:"◈"},{id:"appointments",label:"Appointments",icon:"☰"},{id:"calendar",label:"Calendar",icon:"⊡"}];
+  const title=nav.find(n=>n.id===S.tab)?.label||"";
+  const now=new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
+  const syncTxt=S.loading?"Syncing...":S.error?"Connection error":`${S.apts.length} appointments loaded`;
+  return `
+  <div class="sidebar">
+    <div class="logo-area"><div class="logo-icon">✦</div><div><div class="logo-name">PolySkin</div><div class="logo-sub">Clinic System</div></div></div>
+    <nav class="nav-area"><div class="nav-lbl">Menu</div>
+      ${nav.map(n=>`<button class="nav-btn${S.tab===n.id?" active":""}" data-tab="${n.id}"><span class="nav-icon">${n.icon}</span>${n.label}</button>`).join("")}
+    </nav>
+    <div class="user-area">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="avatar">${S.user.role[0]}</div>
+        <div><div style="color:#fff;font-size:13px;font-weight:700">${S.user.role}</div><div style="color:rgba(255,255,255,0.35);font-size:10px">${S.user.username}</div></div>
+      </div>
+      <button class="refresh-btn" id="refresh-btn">↻ Refresh Data</button>
+      <button class="logout-btn" id="logout">Sign Out</button>
+      <div class="sync-info">${syncTxt}</div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="topbar">
+      <div><div style="font-weight:900;font-size:18px;color:#111827">${title}</div><div style="font-size:11px;color:#9ca3af;margin-top:1px">${now}</div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        ${S.loading?`<div style="font-size:11px;color:#0f766e;font-weight:600">⟳ Syncing...</div>`:""}
+        <div class="role-pill ${isAdmin?"r-admin":"r-recep"}">${isAdmin?"🛡 Admin":"👤 Receptionist"}</div>
+      </div>
+    </div>
+    <div class="content">${tabHTML()}</div>
+  </div>
+  ${S.sel?modalHTML():""}`;
+}
+
+function tabHTML(){
+  if(S.loading) return `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px"><div class="spinner"></div><div style="font-size:13px;color:#9ca3af">Loading from Google Sheets...</div></div>`;
+  if(S.error==="setup") return setupHTML();
+  if(S.error==="fetch") return `<div class="setup-card" style="text-align:center;padding:60px"><div style="font-size:38px;margin-bottom:14px">⚠️</div><div style="font-weight:700;font-size:15px;color:#111827;margin-bottom:8px">Cannot connect to Google Sheets</div><div style="font-size:12px;color:#9ca3af;margin-bottom:20px">Check your Apps Script URL in the HTML file</div><button onclick="fetchData()" style="padding:10px 22px;background:#0f766e;color:#fff;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700">Try Again</button></div>`;
+  if(S.tab==="overview")     return overviewHTML();
+  if(S.tab==="appointments") return appointmentsHTML();
+  if(S.tab==="calendar")     return calendarHTML();
+  return "";
+}
+
+function setupHTML(){
+  return `<div class="setup-card">
+  <div style="font-weight:900;font-size:17px;color:#111827;margin-bottom:6px">⚡ One-Time Setup Required</div>
+  <div style="font-size:12px;color:#9ca3af;margin-bottom:24px">Connect this dashboard to your Google Sheets in 5 steps</div>
+  <div class="step"><div class="step-num">1</div><div class="step-text">Go to <a href="https://script.google.com" target="_blank" style="color:#0f766e;font-weight:700">script.google.com</a> → click <strong>New Project</strong></div></div>
+  <div class="step"><div class="step-num">2</div><div class="step-text">Delete all existing code → paste the <strong>Google Apps Script code</strong> I gave you separately</div></div>
+  <div class="step"><div class="step-num">3</div><div class="step-text">Click <strong>Deploy</strong> → <strong>New Deployment</strong> → type: <strong>Web App</strong></div></div>
+  <div class="step"><div class="step-num">4</div><div class="step-text">Set <strong>"Who has access"</strong> to <strong>Anyone</strong> → click <strong>Deploy</strong> → copy the URL</div></div>
+  <div class="step"><div class="step-num">5</div><div class="step-text">Open this <code>.html</code> file in Notepad → find <code>YOUR_APPS_SCRIPT_URL_HERE</code> → replace with your URL → save → reopen in browser ✓</div></div>
+  </div>`;
+}
+
+function overviewHTML(){
+  const ta=S.apts.filter(a=>a.date===TODAY);
+  const conf=ta.filter(a=>a.status==="Confirmed").length;
+  const pend=ta.filter(a=>a.status==="Pending").length;
+  const canc=ta.filter(a=>a.status==="Cancelled").length;
+  const stats=[{l:"Total Today",v:ta.length,c:"#0f766e",b:"#0f766e",i:"📋"},{l:"Confirmed",v:conf,c:"#16a34a",b:"#16a34a",i:"✅"},{l:"Pending",v:pend,c:"#d97706",b:"#d97706",i:"⏳"},{l:"Cancelled",v:canc,c:"#dc2626",b:"#dc2626",i:"❌"}];
+  const bc=["Hawally","Salmiya","Mahboula","Sabah Al Salem"].map(b=>({name:b,count:ta.filter(a=>a.branch===b).length}));
+  const mx=Math.max(...bc.map(b=>b.count),1);
+  return `
+  <div class="stat-grid">${stats.map(s=>`<div class="stat-card" style="border-top-color:${s.b}"><div style="font-size:22px">${s.i}</div><div class="stat-num" style="color:${s.c}">${s.v}</div><div class="stat-lbl">${s.l}</div></div>`).join("")}</div>
+  <div class="two-col">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div class="card-title" style="margin:0">Today's Schedule</div><div style="font-size:11px;color:#9ca3af">${ta.length} appointments</div></div>
+      ${ta.length===0
+        ?`<div style="text-align:center;padding:50px;color:#d1d5db"><div style="font-size:40px;margin-bottom:10px">📋</div><div style="font-size:13px">No appointments today</div></div>`
+        :[...ta].sort((a,b)=>a.time.localeCompare(b.time)).map(a=>`<div class="apt-row" data-id="${a.id}"><div class="time-badge">${a.time}</div><div style="flex:1;min-width:0"><div class="apt-name">${a.name}</div><div class="apt-sub">${a.doctor} · ${a.branch}</div></div>${badge(a.status)}</div>`).join("")}
+    </div>
+    <div class="card"><div class="card-title">Branches — Today</div>
+      ${bc.map(b=>`<div style="margin-bottom:13px"><div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;color:#374151">${b.name}</span><span style="font-size:16px;font-weight:800;color:${b.count>0?"#0f766e":"#d1d5db"}">${b.count}</span></div><div class="branch-bar"><div class="branch-fill" style="width:${Math.round((b.count/mx)*100)}%"></div></div></div>`).join("")}
+    </div>
+  </div>`;
+}
+
+function appointmentsHTML(){
+  let f=S.apts;
+  if(S.search)        f=f.filter(a=>a.name.toLowerCase().includes(S.search.toLowerCase())||a.phone.includes(S.search));
+  if(S.docF!=="All")    f=f.filter(a=>a.doctor===S.docF);
+  if(S.branchF!=="All") f=f.filter(a=>a.branch===S.branchF);
+  if(S.statusF!=="All") f=f.filter(a=>a.status===S.statusF);
+  if(S.dateF)           f=f.filter(a=>a.date===S.dateF);
+  f=[...f].sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+  const hasF=S.search||S.docF!=="All"||S.branchF!=="All"||S.statusF!=="All"||S.dateF;
+  return `
+  <div class="filter-bar">
+    <input type="text" id="fsearch" placeholder="🔍 Search patient or phone..." value="${S.search}">
+    <select id="fdoc">${DOCS.map(d=>`<option${S.docF===d?" selected":""}>${d}</option>`).join("")}</select>
+    <select id="fbranch">${BRANCHES.map(b=>`<option${S.branchF===b?" selected":""}>${b}</option>`).join("")}</select>
+    <select id="fstatus">${["All","Confirmed","Pending","Cancelled","Completed"].map(s=>`<option${S.statusF===s?" selected":""}>${s}</option>`).join("")}</select>
+    <input type="date" id="fdate" value="${S.dateF}">
+    ${hasF?`<button class="clear-btn" id="fclear">✕ Clear</button>`:""}
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="padding:15px 20px;border-bottom:1px solid #f3f4f6;display:flex;justify-content:space-between;align-items:center"><div style="font-weight:800;font-size:14px;color:#111827">All Appointments</div><div style="font-size:11px;color:#9ca3af">${f.length} record${f.length!==1?"s":""}</div></div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Patient</th><th>Phone</th><th>Doctor</th><th>Branch</th><th>Date</th><th>Time</th><th>Status</th></tr></thead>
+      <tbody>${f.length===0
+        ?`<tr><td colspan="7" style="text-align:center;padding:48px;color:#9ca3af">No appointments found</td></tr>`
+        :f.map(a=>`<tr data-id="${a.id}"><td><div style="display:flex;align-items:center;gap:10px"><div class="initials">${ini(a.name)}</div><span style="font-weight:600">${a.name}</span></div></td><td style="color:#6b7280">${a.phone}</td><td style="font-size:11px;color:#374151">${a.doctor}</td><td><span class="branch-tag">${a.branch}</span></td><td style="color:#374151;white-space:nowrap">${a.date?new Date(a.date+"T12:00:00").toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"2-digit"}):""}</td><td style="font-weight:800;color:#0f766e">${a.time}</td><td>${badge(a.status)}</td></tr>`).join("")}
+      </tbody>
+    </table></div>
+  </div>`;
+}
+
+function calendarHTML(){
+  const y=S.calYear,m=S.calMonth;
+  const label=new Date(y,m).toLocaleString("en-US",{month:"long"});
+  const first=new Date(y,m,1).getDay();
+  const days=new Date(y,m+1,0).getDate();
+  const byDate={};
+  S.apts.forEach(a=>{if(!byDate[a.date])byDate[a.date]=[];byDate[a.date].push(a);});
+  const selStr=`${y}-${String(m+1).padStart(2,"0")}-${String(S.calDay).padStart(2,"0")}`;
+  const selApts=(byDate[selStr]||[]).sort((a,b)=>a.time.localeCompare(b.time));
+  let cells="";
+  for(let i=0;i<first;i++) cells+=`<div></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
+    const cnt=byDate[ds]?.length||0;
+    const isSel=d===S.calDay,isToday=ds===TODAY;
+    cells+=`<div class="cal-day${isSel?" sel":""}${isToday&&!isSel?" today":""}" data-cal="${d}">${d}${cnt>0?`<div class="cal-dots">${Array.from({length:Math.min(cnt,3)}).map(()=>`<div class="cal-dot${isSel?" on-sel":""}"></div>`).join("")}</div>`:""}</div>`;
+  }
+  return `
+  <div class="two-col">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><button class="cal-nav" id="cal-prev">‹</button><div style="font-weight:800;font-size:15px;color:#111827">${label} ${y}</div><button class="cal-nav" id="cal-next">›</button></div>
+      <div class="cal-grid" style="margin-bottom:7px">${["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=>`<div class="cal-hdr">${d}</div>`).join("")}</div>
+      <div class="cal-grid">${cells}</div>
+    </div>
+    <div class="card">
+      <div style="font-weight:800;font-size:14px;color:#111827;margin-bottom:3px">${new Date(selStr+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"})}</div>
+      <div style="font-size:11px;color:#9ca3af;margin-bottom:15px">${selApts.length} appointment${selApts.length!==1?"s":""}</div>
+      ${selApts.length===0
+        ?`<div style="text-align:center;padding:40px 0;color:#d1d5db"><div style="font-size:36px;margin-bottom:8px">📅</div><div style="font-size:12px">No appointments</div></div>`
+        :selApts.map(a=>`<div class="apt-row" data-id="${a.id}" style="border-left:3px solid ${ST[a.status]?.dot||"#10b981"}"><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-weight:700;font-size:12px;color:#111827">${a.name}</span><span style="font-size:12px;font-weight:800;color:#0f766e">${a.time}</span></div><div style="font-size:10px;color:#9ca3af;margin-bottom:6px">${a.doctor}</div><div style="display:flex;justify-content:space-between;align-items:center"><span class="tag-sm">${a.branch}</span>${badge(a.status)}</div></div></div>`).join("")}
+    </div>
+  </div>`;
+}
+
+function modalHTML(){
+  const a=S.sel,isAdmin=S.user.role==="Admin";
+  const sMap={Confirmed:"ac",Pending:"ap",Cancelled:"ax",Completed:"ad"};
+  return `<div class="modal-bg" id="mbg"><div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px">
+      <div style="display:flex;gap:13px;align-items:center"><div class="initials" style="width:48px;height:48px;border-radius:13px;font-size:15px">${ini(a.name)}</div><div><div style="font-weight:800;font-size:17px;color:#111827">${a.name}</div><div style="font-size:12px;color:#9ca3af;margin-top:2px">📞 ${a.phone}</div></div></div>
+      <button class="close-btn" id="mclose">×</button>
+    </div>
+    <div class="info-grid">
+      <div class="info-box"><div class="info-lbl">👨‍⚕️ Doctor</div><div class="info-val">${a.doctor}</div></div>
+      <div class="info-box"><div class="info-lbl">📍 Branch</div><div class="info-val">${a.branch}</div></div>
+      <div class="info-box"><div class="info-lbl">📅 Date</div><div class="info-val">${a.date?new Date(a.date+"T12:00:00").toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"long"}):""}</div></div>
+      <div class="info-box"><div class="info-lbl">⏰ Time</div><div class="info-val">${a.time}</div></div>
+    </div>
+    <div style="font-size:10px;font-weight:700;color:#9ca3af;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:9px">Status ${!isAdmin?`<span style="color:#d97706;font-weight:500;text-transform:none">— Admin only</span>`:""}</div>
+    <div class="status-btns">${["Confirmed","Pending","Cancelled","Completed"].map(s=>`<button class="s-btn${a.status===s?" "+sMap[s]:""}" data-status="${s}" ${!isAdmin?"disabled":""}>${s}</button>`).join("")}</div>
+    <a href="${gcal(a)}" target="_blank" class="action-btn btn-cal">📅 Send Google Calendar Link to Client</a>
+    <a href="https://wa.me/${(a.phone||"").replace(/\D/g,"")}" target="_blank" class="action-btn btn-wa">💬 Open WhatsApp</a>
+  </div></div>`;
+}
+
+function bind(){
+  const lb=document.getElementById("login-btn"); if(lb) lb.onclick=doLogin;
+  const lp=document.getElementById("lp"); if(lp) lp.onkeydown=e=>{if(e.key==="Enter")doLogin();};
+  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{S.tab=b.dataset.tab;render();});
+  const lo=document.getElementById("logout"); if(lo) lo.onclick=()=>{S.user=null;render();};
+  const rf=document.getElementById("refresh-btn"); if(rf) rf.onclick=fetchData;
+  document.querySelectorAll(".apt-row[data-id]").forEach(r=>r.onclick=()=>{const a=S.apts.find(x=>x.id===parseInt(r.dataset.id));if(a){S.sel=a;render();}});
+  document.querySelectorAll("tr[data-id]").forEach(r=>r.onclick=()=>{const a=S.apts.find(x=>x.id===parseInt(r.dataset.id));if(a){S.sel=a;render();}});
+  const mbg=document.getElementById("mbg"); if(mbg) mbg.onclick=e=>{if(e.target===mbg){S.sel=null;render();}};
+  const mc=document.getElementById("mclose"); if(mc) mc.onclick=()=>{S.sel=null;render();};
+  document.querySelectorAll("[data-status]").forEach(b=>b.onclick=()=>{
+    if(S.sel&&S.user.role==="Admin"){const ns=b.dataset.status;S.apts=S.apts.map(a=>a.id===S.sel.id?{...a,status:ns}:a);S.sel={...S.sel,status:ns};render();}
+  });
+  const fs=document.getElementById("fsearch"); if(fs) fs.oninput=e=>{S.search=e.target.value;render();};
+  const fd=document.getElementById("fdoc");    if(fd) fd.onchange=e=>{S.docF=e.target.value;render();};
+  const fb=document.getElementById("fbranch"); if(fb) fb.onchange=e=>{S.branchF=e.target.value;render();};
+  const fst=document.getElementById("fstatus");if(fst)fst.onchange=e=>{S.statusF=e.target.value;render();};
+  const fdt=document.getElementById("fdate");  if(fdt)fdt.onchange=e=>{S.dateF=e.target.value;render();};
+  const fc=document.getElementById("fclear");  if(fc) fc.onclick=()=>{S.search="";S.docF="All";S.branchF="All";S.statusF="All";S.dateF="";render();};
+  const cp=document.getElementById("cal-prev");if(cp) cp.onclick=()=>{if(S.calMonth===0){S.calMonth=11;S.calYear--;}else S.calMonth--;render();};
+  const cn=document.getElementById("cal-next");if(cn) cn.onclick=()=>{if(S.calMonth===11){S.calMonth=0;S.calYear++;}else S.calMonth++;render();};
+  document.querySelectorAll("[data-cal]").forEach(d=>d.onclick=()=>{S.calDay=parseInt(d.dataset.cal);render();});
+}
+
+function doLogin(){
+  const u=document.getElementById("lu").value.trim().toLowerCase();
+  const p=document.getElementById("lp").value;
+  const c=CREDS[u];
+  if(c&&c.pass===p){ S.user={username:u,role:c.role}; fetchData(); }
+  else{ document.getElementById("err").style.display="block"; }
+}
+
+render();
+</script>
+</body>
+</html>
